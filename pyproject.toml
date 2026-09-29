@@ -1,0 +1,16 @@
+[project]
+name = "dungeon-agents"
+version = "0.1.0"
+description = "A hands-on Python project for learning A2A and MCP through a multi-agent dungeon game."
+requires-python = ">=3.11"
+dependencies = [
+    "openai-agents",
+    "python-dotenv",
+]
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
