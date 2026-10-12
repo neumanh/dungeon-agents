@@ -52,7 +52,8 @@ async def main():
         responses = client.send_message(message_request)
 
         async for response in responses:
-            print(response)
+            response_text = response.message.parts[0].text
+            print(f'[{character.capitalize()}]\n  {response_text}')
 
 
 asyncio.run(main())
