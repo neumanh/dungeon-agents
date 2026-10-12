@@ -4,6 +4,8 @@ from a2a.helpers import new_text_message
 from a2a.types import SendMessageRequest
 from a2a.client import ClientFactory
 
+from dungeon_agents.common.game_state import GameState
+
 
 agent_urls = {
     "fighter": "http://127.0.0.1:9001",
@@ -18,6 +20,8 @@ client_dict = {
     "mage": None,
     "rogue": None,
 }
+
+game_state = GameState()  # Initialize the game state with default NPC HP
 
 async def main():
     while True:
