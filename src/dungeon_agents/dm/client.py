@@ -6,10 +6,12 @@ from a2a.client import ClientFactory
 
 
 fighter_url = "http://127.0.0.1:9001"
+mage_url = "http://127.0.0.1:9002"
+rogue_url = "http://127.0.0.1:9003"
 
 factory = ClientFactory()
 
-message = new_text_message("Hug the goblin")
+message = new_text_message("What do you do against the goblin?")
 
 message_request = SendMessageRequest(
     message=message
@@ -17,7 +19,7 @@ message_request = SendMessageRequest(
 
 
 async def main():
-    client = await factory.create_from_url(fighter_url)
+    client = await factory.create_from_url(rogue_url)
 
     responses = client.send_message(message_request)
 
