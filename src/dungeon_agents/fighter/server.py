@@ -11,7 +11,7 @@ from a2a.server.routes import create_agent_card_routes, create_jsonrpc_routes
 
 from starlette.applications import Starlette
 
-from dungeon_agents.fighter.executor import PlayerAgentExecutor
+from dungeon_agents.common.executor import PlayerAgentExecutor
 
 from dungeon_agents.fighter.agent import fighter_agent
 from agents import SQLiteSession
