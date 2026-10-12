@@ -5,26 +5,54 @@ from a2a.types import SendMessageRequest
 from a2a.client import ClientFactory
 
 
-fighter_url = "http://127.0.0.1:9001"
-mage_url = "http://127.0.0.1:9002"
-rogue_url = "http://127.0.0.1:9003"
+agent_urls = {
+    "fighter": "http://127.0.0.1:9001",
+    "mage": "http://127.0.0.1:9002",
+    "rogue": "http://127.0.0.1:9003",
+}
 
 factory = ClientFactory()
 
-message = new_text_message("What do you do against the goblin?")
-
-message_request = SendMessageRequest(
-    message=message
-)
-
+client_dict = {
+    "fighter": None,
+    "mage": None,
+    "rogue": None,
+}
 
 async def main():
-    client = await factory.create_from_url(rogue_url)
+    while True:
+        character = input("Who should act? ").lower()
 
-    responses = client.send_message(message_request)
+        if character == "quit":
+            print("Game over!")
+            break
 
-    async for response in responses:
-        print(response)
+        current_url = agent_urls.get(character)
+        if not current_url:
+            print(f"Unknown character: {character}")
+            continue
+
+        client = client_dict.get(character)
+        if not client:
+            client = await factory.create_from_url(current_url)
+            client_dict[character] = client
+
+        user_message = input("What should the character do? ")
+        if not user_message:
+            print("No action provided. Next turn.")
+            continue
+
+        message = new_text_message(user_message)
+
+        message_request = SendMessageRequest(
+            message=message
+        )
+
+        # Send the message and print the response here
+        responses = client.send_message(message_request)
+
+        async for response in responses:
+            print(response)
 
 
 asyncio.run(main())
