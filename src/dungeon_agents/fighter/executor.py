@@ -1,31 +1,31 @@
 from a2a.server.agent_execution import AgentExecutor, RequestContext
 from a2a.server.events import EventQueue
 from a2a.helpers import new_text_message
-from agents import Runner, SQLiteSession
-
-from dungeon_agents.fighter.agent import fighter_agent
+from agents import Runner, SQLiteSession, Agent
 
 
 
-class FighterAgentExecutor(AgentExecutor):
+class PlayerAgentExecutor(AgentExecutor):
+    """Executor for the Player agent, responsible for handling requests
+      and executing the agent's logic."""
 
-    def __init__(self):
-        # Initialize the SQLite session for storing game sessions
-        self.session = SQLiteSession(
-            "dungeon_game",
-            "data/fighter_sessions.db",
-        )
+    def __init__(self, player_agent: Agent, session: SQLiteSession):
+        """Initialize the PlayerAgentExecutor with the provided agent and session."""
+        self.player_agent = player_agent
+        self.session = session
 
     async def execute(
         self,
         context: RequestContext,
         event_queue: EventQueue,
     ) -> None:
+        """Execute the Player agent's logic based on the provided context
+          and enqueue events to the event queue."""
         user_input = context.get_user_input()
 
         # response = f"Fighter received: {user_input}"
         result = await Runner.run(
-            fighter_agent,
+            self.player_agent,
             user_input,
             session=self.session,
         )

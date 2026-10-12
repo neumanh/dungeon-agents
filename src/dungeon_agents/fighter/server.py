@@ -5,17 +5,17 @@ load_dotenv()
 import uvicorn
 
 from a2a.types import AgentCard, AgentInterface, AgentSkill
-
 from a2a.server.request_handlers import DefaultRequestHandler
 from a2a.server.tasks import InMemoryTaskStore
+from a2a.server.routes import create_agent_card_routes, create_jsonrpc_routes
 
-from a2a.server.routes import (
-    create_agent_card_routes,
-    create_jsonrpc_routes,
-)
 from starlette.applications import Starlette
 
-from dungeon_agents.fighter.executor import FighterAgentExecutor
+from dungeon_agents.fighter.executor import PlayerAgentExecutor
+
+from dungeon_agents.fighter.agent import fighter_agent
+from agents import SQLiteSession
+
 
 # Define the Fighter agent skill
 fighter_skill = AgentSkill(
@@ -47,9 +47,17 @@ fighter_card = AgentCard(
     skills=[fighter_skill],
 )
 
+# Define the SQLite session for storing game sessions
+fighter_session = SQLiteSession(
+    "dungeon_game",
+    "data/fighter_sessions.db",
+)
+
+fighter_executor = PlayerAgentExecutor(player_agent=fighter_agent, session=fighter_session)
+
 # Set up the request handler for the Fighter agent
 request_handler = DefaultRequestHandler(
-    agent_executor=FighterAgentExecutor(),
+    agent_executor=fighter_executor,
     task_store=InMemoryTaskStore(),
     agent_card=fighter_card,
 )

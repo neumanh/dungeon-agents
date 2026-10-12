@@ -9,7 +9,7 @@ fighter_url = "http://127.0.0.1:9001"
 
 factory = ClientFactory()
 
-message = new_text_message("Attack the goblin")
+message = new_text_message("Hug the goblin")
 
 message_request = SendMessageRequest(
     message=message
