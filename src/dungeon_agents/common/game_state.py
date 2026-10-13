@@ -21,12 +21,16 @@ class GameState:
         
         return (natural_roll + attack_bonus) >= self.npc_ac
 
-    def apply_damage(self, damage: int) -> None:
+    def apply_damage(self, damage: int) -> int:
         """Apply damage to the NPC's HP, ensuring it doesn't go below zero."""
         if damage < 0:
             raise ValueError("Damage cannot be negative.")
+        new_npc_hp = max(0, self.npc_hp - damage)
 
-        self.npc_hp = max(0, self.npc_hp - damage)
+        # Calculate the actual damage applied (in case of overkill)
+        actual_damage = self.npc_hp - new_npc_hp
+        self.npc_hp = new_npc_hp
+        return actual_damage
 
     def is_npc_alive(self) -> bool:
         """Check if the NPC is still alive."""
