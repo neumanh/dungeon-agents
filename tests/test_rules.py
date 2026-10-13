@@ -21,7 +21,7 @@ def test_resolve_attack():
     assert game_state.npc_hp == 20 - actual_damage
 
 
-def test_resolve_attack_misses():
+def test_resolve_attack_misses(monkeypatch):
     # Create a GameState for testing
     game_state = GameState(npc_hp=20, npc_ac=15)
 
@@ -60,3 +60,28 @@ def test_resolve_attack_overkill(monkeypatch):
 
     assert actual_damage == 3
     assert game_state.npc_hp == 0
+
+
+def test_resolve_attack_misses_does_not_roll_damage(monkeypatch):
+    # Create a GameState for testing
+    game_state = GameState(npc_hp=20, npc_ac=15)
+
+    # Validate no dice is rolled when the attack misses
+    def fail_if_called(damage_dice):
+        raise AssertionError("Damage should not be rolled on a miss")
+
+    monkeypatch.setattr(
+        Dice,
+        "roll_damage",
+        fail_if_called,
+    )
+
+    actual_damage = resolve_attack(
+        game_state, longsword, 1, 10, 2
+    )
+
+    # Check that no damage is dealt
+    assert actual_damage == 0
+
+    # Check that the NPC's HP remains unchanged
+    assert game_state.npc_hp == 20

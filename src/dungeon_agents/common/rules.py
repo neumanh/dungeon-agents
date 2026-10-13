@@ -40,7 +40,7 @@ def resolve_attack(
 
     Args:
         game_state (GameState): The current state of the game.
-        weapon (Weapon): The weapon being used for the attack.
+        weapon (Weapon): The weapon being usedודקר for the attack.
         hands_used (int): The number of hands used to wield the weapon.
         natural_roll (int): The natural roll of the d20 for the attack.
         attack_bonus (int): The attack bonus to be added to the natural roll.
