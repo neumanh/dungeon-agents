@@ -1,4 +1,4 @@
-from dungeon_agents.common import game_state
+import pytest
 from dungeon_agents.common.game_state import GameState
 from dungeon_agents.common.weapon import longsword
 from dungeon_agents.common.dice import Dice
@@ -123,6 +123,7 @@ def test_attacks_between_character_and_npc():
     # Check that the character's HP has decreased appropriately
     assert character.hp == 30 - actual_damage
 
+
 def test_get_live_combatants():
     # Create a GameState for testing
     npc1 = NPC(name="Goblin 1", dexterity_modifier=2, ac=15, hp=0)  # Dead
@@ -139,6 +140,7 @@ def test_get_live_combatants():
     assert npc1 not in alive_combatants
     assert len(game_state.combatants) == 3
     assert npc1 in game_state.combatants
+
 
 def test_set_initiative_order(monkeypatch):
     # Create a GameState for testing
@@ -176,3 +178,38 @@ def test_set_initiative_order(monkeypatch):
     assert initiative_values == expected_values
 
 
+def test_advance_turn():
+    # Create a GameState for testing
+    npc1 = NPC(name="Goblin 1", dexterity_modifier=0, ac=15, hp=10)
+    npc2 = NPC(name="Goblin 2", dexterity_modifier=0, ac=15, hp=10)
+    character = Character(name="Hero", dexterity_modifier=0, ac=16, hp=30)
+    game_state = GameState(combatants=[npc1, npc2, character])
+
+    # Create TurnManager with initiative order set
+    turn_manager = TurnManager(game_state)
+    order_set = [(npc1, 5), (npc2, 10), (character, 15)]
+    turn_manager.initiative_order = order_set
+
+    # Advance turn 
+    turn_manager.advance_turn()
+    assert turn_manager.current_turn_index == 1  # Should advance to the next index
+
+    # Validate turn reset
+    turn_manager.advance_turn()
+    turn_manager.advance_turn()
+    assert turn_manager.current_turn_index == 0  # Should wrap around to the first index
+
+
+def test_advance_turn_empty_initiative_order():
+    # Create a GameState for testing
+    npc1 = NPC(name="Goblin 1", dexterity_modifier=0, ac=15, hp=10)
+    game_state = GameState(combatants=[npc1])
+
+    # Create TurnManager with empty initiative order
+    turn_manager = TurnManager(game_state)
+    turn_manager.initiative_order = []
+
+    # Attempt to advance turn and expect a ValueError
+    with pytest.raises(ValueError):
+        turn_manager.advance_turn()
+        

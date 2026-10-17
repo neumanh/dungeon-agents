@@ -6,6 +6,7 @@ class TurnManager:
     def __init__(self, game_state: GameState):
         self.game_state: GameState = game_state
         self.initiative_order: list[tuple[Combatant, int]] = []
+        self.current_turn_index = 0
 
     def set_initiative_order(self):
         # This method does 3 things:
@@ -25,3 +26,9 @@ class TurnManager:
 
         # 3. Store the sorted combatants in self.initiative_order
         self.initiative_order = initiative_rolls
+
+    def advance_turn(self) -> None:
+        # Move to the next combatant in the initiative order
+        if not self.initiative_order:
+            raise ValueError("Initiative order is empty. Please set the initiative order first.")
+        self.current_turn_index = (self.current_turn_index + 1) % len(self.initiative_order)
