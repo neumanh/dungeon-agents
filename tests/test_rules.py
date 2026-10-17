@@ -5,6 +5,7 @@ from dungeon_agents.common.dice import Dice
 from dungeon_agents.common.rules import resolve_attack
 from dungeon_agents.common.npc import NPC
 from dungeon_agents.common.character import Character
+from dungeon_agents.common.turn_manager import TurnManager
 
 def test_resolve_attack():
     # Create a GameState for testing
@@ -138,3 +139,40 @@ def test_get_live_combatants():
     assert npc1 not in alive_combatants
     assert len(game_state.combatants) == 3
     assert npc1 in game_state.combatants
+
+def test_set_initiative_order(monkeypatch):
+    # Create a GameState for testing
+    npc1 = NPC(name="Goblin 1", dexterity_modifier=0, ac=15, hp=10)
+    npc2 = NPC(name="Goblin 2", dexterity_modifier=0, ac=15, hp=0)
+    character = Character(name="Hero", dexterity_modifier=0, ac=16, hp=30)
+    game_state = GameState(combatants=[npc1, npc2, character])
+
+    # Create a fake dice roll of 5, 10, 15 using an iterator to simulate the rolls for each combatant
+    rolls = iter([5, 10])  # For npc1, character, no npc2 (dead)
+    def fake_roll_dice(sides):
+        if sides != 20:
+            raise ValueError(f"Expected to roll a d20, but got d{sides}")
+        return next(rolls)
+
+    # Use monkeypatch to replace the roll_dice method in Dice with our fake function
+    monkeypatch.setattr(
+        Dice,
+        "roll_dice",
+        fake_roll_dice,
+    )
+
+    turn_manager = TurnManager(game_state)
+    turn_manager.set_initiative_order()
+
+    # Check that the initiative order is sorted in descending order of initiative rolls
+    initiative_values = [initiative for _, initiative in turn_manager.initiative_order]
+    assert initiative_values == sorted(initiative_values, reverse=True)
+
+    # Check that all alive combatants are included in the initiative order
+    initiative_names = [combatant.name for combatant, _ in turn_manager.initiative_order]
+    expected_names = [character.name, npc1.name]  # npc2 is dead and should not be included
+    expected_values = [10, 5]  # Corresponding initiative values for character and npc1
+    assert initiative_names == expected_names
+    assert initiative_values == expected_values
+
+
