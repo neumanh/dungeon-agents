@@ -212,4 +212,65 @@ def test_advance_turn_empty_initiative_order():
     # Attempt to advance turn and expect a ValueError
     with pytest.raises(ValueError):
         turn_manager.advance_turn()
-        
+
+
+def test_advance_turn_skip_dead_player():
+    # Create a GameState for testing
+    npc1 = NPC(name="Goblin 1", dexterity_modifier=0, ac=15, hp=10)
+    npc2 = NPC(name="Goblin 2", dexterity_modifier=0, ac=15, hp=0)
+    character = Character(name="Hero", dexterity_modifier=0, ac=16, hp=30)
+    game_state = GameState(combatants=[npc1, npc2, character])
+
+    # Create TurnManager with initiative order set
+    turn_manager = TurnManager(game_state)
+    order_set = [(npc1, 15), (npc2, 10), (character, 5)]
+    turn_manager.initiative_order = order_set
+
+    # Advance turn 
+    turn_manager.advance_turn()
+
+    # Making sure dead player is skipped
+    assert turn_manager.current_turn_index == 2
+
+    # Making sure next player is as expected
+    next_player = turn_manager.get_next_player()
+    assert next_player == character
+
+    # Making sure the index is back to 0
+    turn_manager.advance_turn()
+    assert turn_manager.current_turn_index == 0
+
+
+def test_advance_turn_reset_index():
+    # Create a GameState for testing
+    npc1 = NPC(name="Goblin 1", dexterity_modifier=0, ac=15, hp=10)
+    npc2 = NPC(name="Goblin 2", dexterity_modifier=0, ac=15, hp=10)
+    character = Character(name="Hero", dexterity_modifier=0, ac=16, hp=30)
+    game_state = GameState(combatants=[npc1, npc2, character])
+
+    # Create TurnManager with initiative order set
+    turn_manager = TurnManager(game_state)
+
+    # Change index value
+    turn_manager.current_turn_index = 2
+
+    # Reset index
+    turn_manager.set_initiative_order()
+    assert turn_manager.current_turn_index == 0
+
+
+def test_get_next_player_no_alive_players():
+    # Create a GameState for testing
+    npc1 = NPC(name="Goblin 1", dexterity_modifier=0, ac=15, hp=0)
+    npc2 = NPC(name="Goblin 2", dexterity_modifier=0, ac=15, hp=0)
+    character = Character(name="Hero", dexterity_modifier=0, ac=16, hp=0)
+    game_state = GameState(combatants=[npc1, npc2, character])
+
+    # Create TurnManager with initiative order set
+    turn_manager = TurnManager(game_state)
+    order_set = [(npc1, 15), (npc2, 10), (character, 5)]
+    turn_manager.initiative_order = order_set
+
+    # Making sure next player is as expected
+    next_player = turn_manager.get_next_player()
+    assert next_player is None
